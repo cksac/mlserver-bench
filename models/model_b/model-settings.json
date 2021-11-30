@@ -1,0 +1,10 @@
+{
+    "name": "model-b",
+    "implementation": "bench_server.models.Model",
+    "parallel_workers": 2,
+    "parameters": {
+        "extra": {
+            "model_dir": "/app/model_files"
+        }
+    }    
+}

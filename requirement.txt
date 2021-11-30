@@ -1,0 +1,2 @@
+mlserver==0.5.3
+locust=2.5.0
