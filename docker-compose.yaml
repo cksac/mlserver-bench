@@ -1,0 +1,52 @@
+services:
+  seldon:
+    image: iris_bench
+    build: .
+    volumes:
+      - ./src:/app
+    environment:
+      PYTHONPATH: /app
+    command: [
+      "seldon-core-microservice", "SeldonModel", "--workers", "4", "--threads", "2"
+    ]
+    ports:
+      - "30907:9000"
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1g
+
+  mlserver:
+    image: iris_bench
+    build: .
+    volumes:
+      - ./mlserver_config:/mlserver_config
+      - ./src:/app
+    environment:
+      PYTHONPATH: /app
+    command: mlserver start /mlserver_config
+    ports:
+      - "30908:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1g
+
+  fastapi:
+    image: iris_bench
+    build: .
+    volumes:
+      - ./src:/app
+    environment:
+      PYTHONPATH: /app
+    # command: uvicorn fastapi_model:app --host 0.0.0.0 --port 8080 --workers 4
+    command: gunicorn fastapi_model:app --bind 0.0.0.0:8080 --workers 4 --worker-class uvicorn.workers.UvicornWorker
+    ports:
+      - "30909:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1g

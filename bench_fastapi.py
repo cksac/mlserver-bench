@@ -4,44 +4,32 @@ from locust.env import Environment
 from locust.stats import stats_printer, stats_history, print_percentile_stats
 from locust.log import setup_logging
 import random
+import numpy as np
 
 setup_logging("INFO", None)
 
 class ApiUser(FastHttpUser):
-    host = "http://localhost:9091/v2/models"
+    host = ""
 
     def on_start(self):
-        self.requests = []         
-        for i in range(1, 10):
-            inference_request = {
-                "inputs": [
-                    {
-                        "name": "predict",
-                        "datatype": "BYTES",
-                        "shape": [9],
-                        "data": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"],
-                        "parameters": {
-                            "content_type": "str"
-                        }
-                    }
-                ]
-            }
-            self.requests.append(inference_request)
+        input = np.array([[3, 2, 4, 0.2], [  4.7, 3, 1.3, 0.2 ]])
+        inference_request = {"data": input.tolist() }
+        self.requests = inference_request
 
     @task
     def predict(self):
-        request = random.choice(self.requests)
-        self.client.post("/model-a/infer", json=request)
-        # r = self.client.post("/model-a/infer", json=request)
-        # print(r.content)
+        self.client.post("/iris/predict", json=self.requests)
+        # r = self.client.post("/iris/predict", json=self.requests)
+        # print(r.json())
 
 if __name__ == "__main__":
-    user_count = 4
-    spawn_rate = 4
+    host = 'http://localhost:30909/models'
+    user_count = 16
+    spawn_rate = 2
     duration = 60
 
     # setup Environment and Runner
-    env = Environment(user_classes=[ApiUser])
+    env = Environment(host=host, user_classes=[ApiUser])
     env.create_local_runner()
 
     # start a WebUI instance

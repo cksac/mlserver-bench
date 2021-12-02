@@ -1,0 +1,5 @@
+{
+    "name": "iris",
+    "implementation": "mlserver_model.MLServerModel",
+    "parallel_workers": 4
+}
